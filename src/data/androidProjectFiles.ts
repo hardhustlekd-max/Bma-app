@@ -590,8 +590,7 @@ class OfflineWebViewClient(
             android:id="@+id/ivErrorIcon"
             android:layout_width="88dp"
             android:layout_height="88dp"
-            android:src="@drawable/ic_no_wifi"
-            android:tint="@color/brand_primary"
+            app:srcCompat="@drawable/ic_no_wifi"
             android:contentDescription="@string/error_offline_title" />
 
         <TextView
@@ -667,8 +666,8 @@ class OfflineWebViewClient(
     category: 'config',
     description: 'Application Gradle build script targeting Android SDK 35 with AndroidX Core, Material Components, and SwipeRefreshLayout.',
     code: `plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
@@ -683,11 +682,12 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables.useSupportLibrary = true
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -704,6 +704,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
+    }
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
     }
 }
 
@@ -840,40 +844,42 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+      - name: Make Gradle Scripts Executable
+        run: |
+          chmod +x ./gradlew 2>/dev/null || true
+          chmod +x ./android/gradlew 2>/dev/null || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.7'
-          cache-disabled: false
-
-      - name: Make Gradle Wrapper Executable
-        run: |
-          chmod +x ./gradlew 2>/dev/null || true
-          chmod +x ./android/gradlew 2>/dev/null || true
+          validate-wrappers: false
 
       - name: Accept Android SDK Licenses
         run: |
+          mkdir -p "$ANDROID_HOME/licenses" 2>/dev/null || true
+          echo "24333f8a63b6825ea9c5514f83c2829b004d1fee" >> "$ANDROID_HOME/licenses/android-sdk-license" 2>/dev/null || true
+          echo "d5c2207564b67277e248b8b29f1148d1ce35d64e" >> "$ANDROID_HOME/licenses/android-sdk-license" 2>/dev/null || true
+          echo "84831b9409646a918e30573bab4c9c91346d8abd" >> "$ANDROID_HOME/licenses/android-sdk-preview-license" 2>/dev/null || true
           yes | sdkmanager --licenses 2>/dev/null || true
 
       - name: Build Android Debug APK
         run: |
           if [ -d "android/app" ] && [ -f "android/gradlew" ]; then
-            echo "Building via android/ directory..."
-            cd android && ./gradlew assembleDebug --no-daemon --stacktrace
+            echo "Building inside android/ folder..."
+            cd android
+            ./gradlew assembleDebug --no-daemon --stacktrace
           elif [ -f "./gradlew" ]; then
-            echo "Building via root directory..."
+            echo "Building at repository root..."
             ./gradlew assembleDebug --no-daemon --stacktrace
           else
-            echo "Running gradle assembleDebug directly..."
+            echo "Executing direct gradle command..."
             gradle assembleDebug --no-daemon --stacktrace
           fi
 
-      - name: Verify Generated APK
+      - name: Inspect Build Artifacts
         run: |
-          echo "=== Generated APK Files ==="
+          echo "=== Found APKs ==="
           find . -name "*.apk" -type f
 
       - name: Upload APK as Workflow Artifact

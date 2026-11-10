@@ -14,4 +14,10 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "bmarail-wrapper"
-include(":app")
+
+if (file("app").exists()) {
+    include(":app")
+} else if (file("android/app").exists()) {
+    include(":app")
+    project(":app").projectDir = file("android/app")
+}

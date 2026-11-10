@@ -53,7 +53,7 @@
             android:id="@+id/ivErrorIcon"
             android:layout_width="88dp"
             android:layout_height="88dp"
-            android:src="@drawable/ic_no_wifi"
+            app:srcCompat="@drawable/ic_no_wifi"
             android:contentDescription="@string/error_offline_title" />
 
         <TextView
