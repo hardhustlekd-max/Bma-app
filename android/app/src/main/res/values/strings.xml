@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ባ.ሞ.ማ መተግበሪያ</string>
+    <string name="app_name_en">BMA Rail App</string>
+
+    <string name="error_offline_title">ግንኙነት አልተገኘም (No Connection)</string>
+    <string name="error_offline_desc">ይህ ገጽ በስልክዎ ማህደረ-ትውስታ ውስጥ አልተቀመጠም። እባክዎ የኢንተርኔት ግንኙነትዎን ያረጋግጡና እንደገና ይሞክሩ።\n\n(This page is not yet cached. Please check your internet connection and try again.)</string>
+
+    <string name="error_server_title">ሰርቨሩ ምላሽ አልሰጠም (Server Error)</string>
+    <string name="error_server_desc">ከድህረ ገጹ ጋር መገናኘት አልተቻለም። እባክዎ ጥቂት ቆይተው እንደገና ይሞክሩ።</string>
+
+    <string name="btn_retry">እንደገና ይሞክሩ (Try Again)</string>
+</resources>

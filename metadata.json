@@ -1,0 +1,6 @@
+{
+  "name": "ባ.ሞ.ማ መተግበሪያ - Android Web Wrapper",
+  "description": "Production-ready Android Kotlin WebView wrapper for bmarail-production.up.railway.app featuring advanced offline caching, network-aware WebSettings, and modern connectivity monitoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
