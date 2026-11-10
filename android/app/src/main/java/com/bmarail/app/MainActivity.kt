@@ -181,7 +181,7 @@ class MainActivity : AppCompatActivity() {
 
                 if (request?.isForMainFrame == true) {
                     hasPageLoadError = true
-                    handlePageError(error?.errorCode ?: ERROR_UNKNOWN)
+                    handlePageError(error?.errorCode ?: WebViewClient.ERROR_UNKNOWN)
                 }
             }
 

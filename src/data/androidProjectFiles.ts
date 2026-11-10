@@ -205,7 +205,7 @@ class MainActivity : AppCompatActivity() {
                 // Only react to failures on the main page/frame (not sub-resources like third-party analytics)
                 if (request?.isForMainFrame == true) {
                     hasPageLoadError = true
-                    handlePageError(error?.errorCode ?: ERROR_UNKNOWN)
+                    handlePageError(error?.errorCode ?: WebViewClient.ERROR_UNKNOWN)
                 }
             }
 
@@ -457,7 +457,7 @@ class OfflineWebViewClient(
         if (request?.isForMainFrame == true) {
             val context = view?.context ?: return
             val isOffline = !NetworkUtils.isNetworkAvailable(context)
-            onErrorReceived(isOffline, error?.errorCode ?: ERROR_UNKNOWN)
+            onErrorReceived(isOffline, error?.errorCode ?: WebViewClient.ERROR_UNKNOWN)
         }
     }
 
@@ -839,26 +839,42 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
-          cache: 'gradle'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+          cache-disabled: false
 
       - name: Make Gradle Wrapper Executable
         run: |
-          if [ -f "./gradlew" ]; then
-            chmod +x ./gradlew
-          fi
-          if [ -f "./android/gradlew" ]; then
-            chmod +x ./android/gradlew
-          fi
+          chmod +x ./gradlew 2>/dev/null || true
+          chmod +x ./android/gradlew 2>/dev/null || true
+
+      - name: Accept Android SDK Licenses
+        run: |
+          yes | sdkmanager --licenses 2>/dev/null || true
 
       - name: Build Android Debug APK
         run: |
-          if [ -f "./gradlew" ]; then
-            ./gradlew assembleDebug --no-daemon --stacktrace
-          elif [ -f "./android/gradlew" ]; then
+          if [ -d "android/app" ] && [ -f "android/gradlew" ]; then
+            echo "Building via android/ directory..."
             cd android && ./gradlew assembleDebug --no-daemon --stacktrace
+          elif [ -f "./gradlew" ]; then
+            echo "Building via root directory..."
+            ./gradlew assembleDebug --no-daemon --stacktrace
           else
-            echo "Gradle wrapper not found" && exit 1
+            echo "Running gradle assembleDebug directly..."
+            gradle assembleDebug --no-daemon --stacktrace
           fi
+
+      - name: Verify Generated APK
+        run: |
+          echo "=== Generated APK Files ==="
+          find . -name "*.apk" -type f
 
       - name: Upload APK as Workflow Artifact
         uses: actions/upload-artifact@v4
@@ -866,8 +882,9 @@ jobs:
           name: bmarail-app-debug-apk
           path: |
             **/build/outputs/apk/debug/*.apk
-            **/build/outputs/apk/release/*.apk
+            **/build/outputs/apk/**/*.apk
           retention-days: 30
+          if-no-files-found: warn
 
       - name: Create Release on Version Tag
         if: startsWith(github.ref, 'refs/tags/v')
@@ -875,7 +892,7 @@ jobs:
         with:
           files: |
             **/build/outputs/apk/debug/*.apk
-            **/build/outputs/apk/release/*.apk
+            **/build/outputs/apk/**/*.apk
           name: "ባ.ሞ.ማ መተግበሪያ Release \${{ github.ref_name }}"
           generate_release_notes: true
         env:

@@ -36,7 +36,7 @@ class OfflineWebViewClient(
         if (request?.isForMainFrame == true) {
             val context = view?.context ?: return
             val isOffline = !NetworkUtils.isNetworkAvailable(context)
-            onErrorReceived(isOffline, error?.errorCode ?: ERROR_UNKNOWN)
+            onErrorReceived(isOffline, error?.errorCode ?: WebViewClient.ERROR_UNKNOWN)
         }
     }
 
